@@ -133,8 +133,10 @@ function spawnEnemies(){
 
 //some stolen code real quick
 //ths functino basically keeps calling it's self fro mwhat I understand...
+let animationID;
+
 function animate(){
-    requestAnimationFrame(animate);
+    animationID = requestAnimationFrame(animate);
 
     //clears canvas
     ctx.clearRect(0,0,canvas.width,canvas.height)
@@ -148,13 +150,26 @@ function animate(){
     enemies.forEach((enemy, index)=>{
         enemy.update();
 
+        //end game if this happens
+        const dist = Math.hypot(player.x - enemy.x, player.y - enemy.y)
+        if(dist - enemy.radius - player.radius < 1 ){
+            console.log("end game")
+            cancelAnimationFrame(animationID);
+        }
+
         projectiles.forEach((projectile) =>{
+            
+            //checking hits against enemies
             const dist = Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y)
 
+
             if(dist - enemy.radius - projectile.radius < 1 ){
+
+                setTimeout(() =>{
                 console.log("remove from screen");
                 enemies.splice(index, 1);
                 projectiles.splice(index, 1)
+            }, 0)
             }
         })
 

@@ -56,6 +56,34 @@ class Projectile {
     }
 }
 
+class Enemies {
+    constructor(x,y,radius,color, velocity){
+        this.x = x;
+        this.y = y;
+        this.radius = radius;
+        this.color = color;
+        this.velocity = velocity
+    }
+
+    draw(){
+        //tells context we about to DRAW
+        ctx.beginPath();
+        //to draw a circle
+        ctx.arc(this.x,this.y,this.radius,0,Math.PI * 2, false)
+        //to allow the color to show up
+        ctx.fillStyle =this.color;
+        //actually draws the thng
+        ctx.fill();
+    }
+
+    update(){
+        //so I don't have to call draw everytime we update!!
+        this.draw();
+        this.x = this.x + this.velocity.x;
+        this.y = this.y + this.velocity.y;
+    }
+}
+
 const player = new Player(xcoord,
     ycoord,
     30,
@@ -71,11 +99,37 @@ const projectile = new Projectile(
     ycoord,
     5,
     "red",
-    {x:-1,
+    {x:- 1,
     y:1}
 )
 
+//groups the projectiles
 const projectiles = [];
+//groups the 
+const enemies = [];
+
+function spawnEnemies(){
+    setInterval(()=>{
+        const x = Math.random() * canvas.width;
+        const y = 5;
+        const radius = Math.random() * (30 - 10) + 10;
+        const color = 'green';
+
+        const angle = Math.atan2(
+            ycoord - y, 
+            xcoord -x )
+        
+        //console.log(angle);
+    
+        const velocity = {
+            x:Math.cos(angle) , 
+            y:Math.sin(angle)
+        }
+        enemies.push(new Enemies(x,y,radius,color,velocity))
+
+        //console.log("enemies");
+    }, 1000)
+}
 
 //some stolen code real quick
 //ths functino basically keeps calling it's self fro mwhat I understand...
@@ -91,6 +145,22 @@ function animate(){
         projectile.update();
     } )
 
+    enemies.forEach((enemy, index)=>{
+        enemy.update();
+
+        projectiles.forEach((projectile) =>{
+            const dist = Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y)
+
+            if(dist - enemy.radius - projectile.radius < 1 ){
+                console.log("remove from screen");
+                enemies.splice(index, 1);
+                projectiles.splice(index, 1)
+            }
+        })
+
+       
+    })
+
 }
 
 window.addEventListener("click", (event) => {
@@ -102,7 +172,7 @@ window.addEventListener("click", (event) => {
         event.clientY - ycoord, 
         event.clientX - xcoord)
     
-    console.log(angle);
+    //console.log(angle);
 
     const velocity = {
         x:Math.cos(angle) , 
@@ -119,3 +189,4 @@ window.addEventListener("click", (event) => {
 })
 
 animate();
+spawnEnemies();
